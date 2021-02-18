@@ -3,8 +3,12 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const session = require("express-session")
 
+
+const session = require("express-session") 
+// module to create session middleware
+// Session is a storage that consists of information on server-side
+// Session will disappear when user closes the browser
 const mongoose = require("mongoose");
 
 require('dotenv').config();
@@ -36,10 +40,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: { maxAge: 60 * 60 * 1000}
+  secret: process.env.SESSION_SECRET, // key to encrypt
+  resave: false, // setting that always save session. false => do not save sessions always 
+  saveUninitialized: false, // Uninitialize session before save. false => do not Uninitialize
+  cookie: { maxAge: 60 * 60 * 1000} //session cookie setting. cookie will last for one hour 
 }))
 
 app.use((req, res, next) => {
