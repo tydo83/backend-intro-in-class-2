@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var axios = require('axios');
 
 // v1
 // const User = require("./model/User");
@@ -24,17 +25,59 @@ const { checkLoginEmptyMiddleware,
 /* GET users listing. */
 router.get('/create-user', function (req, res, next) {
   // res.render('sign-up', {error:null, success:null});
-  res.render('sign-up');
+  if(req.session.user) {
+    res.redirect('home');
+  } else {
+    res.render('sign-up');
+  }
 });
 
 router.get('/login', function (req, res, next) {
   // res.render("login", {error:null, error2: null, error3: null, success:null})
-  res.render('login');
+  // res.render('login');
+  if(req.session.user) {
+    res.redirect('home');
+  } else {
+    res.render('login');
+  }
 });
 
-router.get('/home', function (req, res, next) {
-  // res.render("login", {error:null, error2: null, error3: null, success:null})
-  res.render('home');
+router.get('/home', async function (req, res, next) {
+  // try {
+  //   let result = await axios.get(
+  //     `http://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHY_API_KEY}&q=hamster`
+  //     )
+  //     res.json(result.data);
+  // } catch (e) {
+  //   res.status(500).json({
+  //     message: "failure",
+  //     data: e.message,
+  //   })
+  // }
+  if(req.session.user) {
+    res.render("home", {user: req.session.user.email})
+  } else {
+    res.render('message', {error:true});
+  }
+});
+
+router.post("/home", async function (req, res) {
+  if(req.session.user) {
+    try {
+      let result = await axios.get(
+        `https://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHY_API_KEY}&q=${req.body.search}`
+      );
+      console.log(result.data);
+      res.render("home", { data: result.data, user: req.session.user.email });
+    } catch (e) {
+      res.status(500).json({
+        message: "failure",
+        data: e.message,
+      });
+    }
+  } else {
+    res.render("message", {error:true})
+  }
 });
 
 // v1
@@ -109,5 +152,19 @@ router.delete("/delete-user-by-id/:id", deleteUserByID);
 router.put("/update-user-by-id/:id", updateUserByID);
 
 router.put("/update-user-by-email/", updateUserByEmail);
+
+//logout
+router.get("/logout", function (req, res) {
+  req.session.destroy();
+  
+  res.clearCookie("connect.sid", {
+    path: "/",
+    httpOnly: true,
+    secure: false,
+    maxAge: null,
+  })
+
+  res.redirect("/users/login");
+});
 
 module.exports = router;

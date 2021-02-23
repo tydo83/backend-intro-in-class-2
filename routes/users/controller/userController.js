@@ -247,7 +247,8 @@ module.exports = {
                         _id: foundUser._id,
                         email: foundUser.email,
                     }
-                    res.render("home", { user: foundUser.email })
+                    res.redirect("/users/home")
+                    // res.render("home", { user: foundUser.email })
                 } else {
                     res.render("login", {
                         error: {
