@@ -267,5 +267,22 @@ module.exports = {
                 errorMessage: error.message,
             });
         }
-    }
+    },
+    logout: (req, res) => {
+        req.session.destroy();
+        res.clearCookie("connect.sid", {
+            path: "/",
+            httpOnly: true,
+            secure: false,
+            maxAge: null,
+        })
+        res.redirect("/users/login")
+    },
+    createUser: (req, res) => {
+        if(req.session.user) {
+            res.redirect('home');
+        } else {
+            res.render('sign-up')
+        }
+    } 
 }

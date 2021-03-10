@@ -13,6 +13,8 @@ const {
   updateUserByID,
   updateUserByEmail,
   login,
+  logout,
+  createUser,
 } = require("./controller/userController")
 
 const { checkSignupInputIsEmpty } = require("./lib/checkSignup");
@@ -23,14 +25,15 @@ const { checkLoginEmptyMiddleware,
 
 
 /* GET users listing. */
-router.get('/create-user', function (req, res, next) {
-  // res.render('sign-up', {error:null, success:null});
-  if(req.session.user) {
-    res.redirect('home');
-  } else {
-    res.render('sign-up');
-  }
-});
+router.get('/create-user', createUser)
+// router.get('/create-user', function (req, res, next) {
+//   // res.render('sign-up', {error:null, success:null});
+//   if(req.session.user) {
+//     res.redirect('home');
+//   } else {
+//     res.render('sign-up');
+//   }
+// });
 
 router.get('/login', function (req, res, next) {
   // res.render("login", {error:null, error2: null, error3: null, success:null})
@@ -153,18 +156,20 @@ router.put("/update-user-by-id/:id", updateUserByID);
 
 router.put("/update-user-by-email/", updateUserByEmail);
 
-//logout
-router.get("/logout", function (req, res) {
-  req.session.destroy();
-  
-  res.clearCookie("connect.sid", {
-    path: "/",
-    httpOnly: true,
-    secure: false,
-    maxAge: null,
-  })
+router.get("/logout", logout)
 
-  res.redirect("/users/login");
-});
+//logout
+// router.get("/logout", function (req, res) {
+//   req.session.destroy();
+  
+//   res.clearCookie("connect.sid", {
+//     path: "/",
+//     httpOnly: true,
+//     secure: false,
+//     maxAge: null,
+//   })
+
+//   res.redirect("/users/login");
+// });
 
 module.exports = router;
