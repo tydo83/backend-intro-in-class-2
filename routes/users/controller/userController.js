@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const User = require("../model/User");
+const axios = require('axios');
 
 // v2
 // module.exports = {
@@ -116,7 +117,7 @@ module.exports = {
             //     user: savedUser,
             // })
             res.render("sign-up", { success: true })
-        } 
+        }
         catch (error) {
             res.status(500).json({
                 message: "error",
@@ -124,7 +125,7 @@ module.exports = {
             })
         }
     },
-    
+
     deleteUserByID: async (req, res) => {
         try {
             let deletedUser = await User.findByIdAndDelete({ _id: req.params.id });
@@ -224,15 +225,50 @@ module.exports = {
     //         })
     //     }
     // }
+    getLogin: (req, res) => {
+        if (req.session.user) {
+            res.redirect('home');
+        } else {
+            res.render('login');
+        }
+    },
+
+    getHome: async (req, res) => {
+        if (req.session.user) {
+            res.render("home", { user: req.session.user.email })
+        } else {
+            res.render('message', { error: true });
+        }
+    },
+
+    postHome: async (req, res) => {
+        if (req.session.user) {
+            try {
+                let result = await axios.get(
+                    `https://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHY_API_KEY}&q=${req.body.search}`
+                );
+                console.log(result.data);
+                res.render("home", { data: result.data, user: req.session.user.email });
+            } catch (e) {
+                res.status(500).json({
+                    message: "failure",
+                    data: e.message,
+                });
+            }
+        } else {
+            res.render("message", { error: true })
+        }
+    },
+
     login: async (req, res) => {
         try {
             let foundUser = await User.findOne({ email: req.body.email });
             if (!foundUser) {
                 res.render('sign-up', {
                     error: {
-                        message: "User doesn't exist", 
+                        message: "User doesn't exist",
                     }
-                    });
+                });
                 // res.render("login", {error:null, error2: true, error3: null, success:null})
                 // res.status(404).json({
                 //     message: "failure",
@@ -279,10 +315,10 @@ module.exports = {
         res.redirect("/users/login")
     },
     createUser: (req, res) => {
-        if(req.session.user) {
+        if (req.session.user) {
             res.redirect('home');
         } else {
             res.render('sign-up')
         }
-    } 
+    }
 }
